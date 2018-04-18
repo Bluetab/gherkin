@@ -144,7 +144,8 @@ defmodule Gherkin.ParserTest do
     Sometimes background steps have tables
 
     Background:
-      Given the following table
+      Given a certain background
+      And the following table
       | Column one | Column two |
       | Hello      | World      |
 
@@ -286,7 +287,8 @@ defmodule Gherkin.ParserTest do
       %{:"Column one" => "Hello", :"Column two" => "World"}
     ]
     expected_steps = [
-      %Steps.Given{text: "the following table", table_data: expected_table_data, line: 5}
+      %Steps.Given{text: "a certain background", line: 5},
+      %Steps.And{text: "the following table", table_data: expected_table_data, line: 6}
     ]
     %{background_steps: background_steps} = parse_feature(@feature_with_background_with_table)
     assert expected_steps == background_steps

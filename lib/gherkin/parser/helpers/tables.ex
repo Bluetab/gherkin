@@ -10,10 +10,11 @@ defmodule Gherkin.Parser.Helpers.Tables do
   end
 
   def process_background_step_table_line(line, feature, keys) do
-    %{background_steps: [step | rest]} = feature
+    %{background_steps: steps} = feature
+    [step | rest] = steps |> Enum.reverse
     {updated_step, keys} = step |> add_table_row_to_step(line, keys)
     {
-      %{feature | background_steps: [updated_step | rest]},
+      %{feature | background_steps: [updated_step | rest] |> Enum.reverse},
       {:background_steps, keys}
     }
   end
