@@ -139,6 +139,35 @@ defmodule Gherkin.ParserTest do
     Given there are 1 coffees left in the machine
   """
 
+  @feature_with_background_with_table """
+  Feature: Have tables in Background Steps
+    Sometimes background steps have tables
+
+    Background:
+      Given the following table
+      | Column one | Column two |
+      | Hello      | World      |
+
+    Scenario: I have a background step with a table
+      Then everything should be okay
+  """
+
+  @feature_with_background_with_doc_string"""
+  Feature: Have tables
+    Sometimes data is a table
+
+    Background:
+      Given the following data
+      \"\"\"json
+      {
+        \"a\": \"b\"
+      }
+      \"\"\"
+
+    Scenario: I have a step with a doc string
+      Then everything should be okay
+  """
+
   test "Parses the feature name" do
     assert %Feature{name: name, line: 1} = parse_feature(@feature_text)
     assert name == "Serve coffee"
@@ -251,4 +280,25 @@ defmodule Gherkin.ParserTest do
   test "Reads a feature with a multiple tags" do
     assert %{tags: [:beverage, :coffee, :caffeine]} = parse_feature(@feature_with_multiple_feature_tag)
   end
+
+  test "Parses a background step with a table" do
+    expected_table_data = [
+      %{:"Column one" => "Hello", :"Column two" => "World"}
+    ]
+    expected_steps = [
+      %Steps.Given{text: "the following table", table_data: expected_table_data, line: 5}
+    ]
+    %{background_steps: background_steps} = parse_feature(@feature_with_background_with_table)
+    assert expected_steps == background_steps
+  end
+
+  test "Reads a doc string in to the correct background step" do
+    expected_data = "{\n  \"a\": \"b\"\n}\n"
+    expected_steps = [
+      %Steps.Given{text: "the following data", doc_string: expected_data, line: 5},
+    ]
+    %{background_steps: background_steps} = parse_feature(@feature_with_background_with_doc_string)
+    assert expected_steps == background_steps
+  end
+
 end

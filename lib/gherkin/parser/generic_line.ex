@@ -35,7 +35,7 @@ defmodule Gherkin.Parser.GenericLine do
   end
 
   defp process("Background:" <> _, {feature, _}, _line_number) do
-    {feature, :background_steps}
+    {feature, {:background_steps, []}}
   end
 
   defp process("Examples:" <> _, {feature, _}, _line_number) do
@@ -62,7 +62,7 @@ defmodule Gherkin.Parser.GenericLine do
     DocStringParser.start_processing_doc_string(feature, state)
   end
 
-  defp process(line, {feature, {:doc_string, :background_steps} = state}, _line_number) do
+  defp process(line, {feature, {:doc_string, {:background_steps,_}} = state}, _line_number) do
     DocStringParser.process_background_step_doc_string(line, feature, state)
   end
 
@@ -71,7 +71,7 @@ defmodule Gherkin.Parser.GenericLine do
   end
 
   # Tables as part of a step
-  defp process("|" <> line, {feature, {:scenario_steps, keys}}, _line_number) do
+    defp process("|" <> line, {feature, {:scenario_steps, keys}}, _line_number) do
     TableParser.process_step_table_line(line, feature, keys)
   end
 
@@ -80,11 +80,16 @@ defmodule Gherkin.Parser.GenericLine do
     TableParser.process_outline_table_line(line, feature, keys)
   end
 
+  # Tables as part of a background step
+  defp process("|" <> line, {feature, {:background_steps, keys} }, _line_number) do
+    TableParser.process_background_step_table_line(line, feature, keys)
+  end
+
   defp process(line, {feature, :feature_description}, _line_number) do
     FeatureParser.process_feature_desc_line(line, feature)
   end
 
-  defp process(line, {feature, :background_steps}, line_number) do
+  defp process(line, {feature, {:background_steps, _}}, line_number) do
     StepsParser.process_background_step_line(line, feature, line_number)
   end
 

@@ -9,6 +9,15 @@ defmodule Gherkin.Parser.Helpers.Tables do
     }
   end
 
+  def process_background_step_table_line(line, feature, keys) do
+    %{background_steps: [step | rest]} = feature
+    {updated_step, keys} = step |> add_table_row_to_step(line, keys)
+    {
+      %{feature | background_steps: [updated_step | rest]},
+      {:background_steps, keys}
+    }
+  end
+
   def process_outline_table_line(line, feature, keys) do
     %{scenarios: [scenario_outline | rest]} = feature
     {updated_scenario_outline, keys} = scenario_outline
@@ -17,6 +26,16 @@ defmodule Gherkin.Parser.Helpers.Tables do
       %{feature | scenarios: [updated_scenario_outline | rest]},
       {:scenario_outline_example, keys}
     }
+  end
+
+  defp add_table_row_to_step(step, line, []) do
+    {step, table_line_to_columns(line) |> Enum.map(&String.to_atom/1)}
+  end
+  defp add_table_row_to_step(step, line, keys) do
+    new_row = Enum.zip(keys, table_line_to_columns(line)) |> Enum.into(Map.new)
+    %{table_data: current_rows} = step
+    updated_step = %{step | table_data: current_rows ++ [new_row]}
+    {updated_step, keys}
   end
 
   defp add_table_row_to_last_step(scenario, line, []) do

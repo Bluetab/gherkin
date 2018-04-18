@@ -7,7 +7,7 @@ defmodule Gherkin.Parser.Helpers.Steps do
     new_step = string_to_step(line, line_number)
     {
       %{feature | background_steps: current_background_steps ++ [new_step]},
-      :background_steps
+      {:background_steps, []}
     }
   end
 
